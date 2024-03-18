@@ -1,17 +1,15 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/gofiber/fiber/v2"
+	"github.com/karokojnr/duka/config"
+	"github.com/karokojnr/duka/internal/api"
+	"log"
 )
 
 func main() {
-	fmt.Println("Welcome to Duka")
-
-	app := fiber.New()
-
-	// routes
-
-	app.Listen("localhost:4000")
+	cfg, err := config.SetUpEnvironment()
+	if err != nil {
+		log.Fatalf("configurations not loaded %v\n", err)
+	}
+	api.StartServer(cfg)
 }
