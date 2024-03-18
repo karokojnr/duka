@@ -3,19 +3,22 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/karokojnr/duka/internal/api/rest"
+	"github.com/karokojnr/duka/internal/dto"
+	"github.com/karokojnr/duka/internal/service"
 	"net/http"
 )
 
 type UserHandler struct {
-	// svc UserService
-
+	svc service.UserService
 }
 
 func SetupUserRoutes(restHandler *rest.RestHandler) {
 	app := restHandler.App
 
-	// create an instance of user service & inject to handler
-	handler := UserHandler{}
+	svc := service.UserService{}
+	handler := UserHandler{
+		svc,
+	}
 
 	// public endpoints
 	app.Post("/register", handler.Register)
@@ -34,71 +37,86 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 	app.Get("/order", handler.GetOrders)
 	app.Get("/order/:id", handler.GetOrder)
 
-	app.Post("/become-seller", handler.BecomeASeller)
+	app.Post("/role", handler.AddRole)
 
 }
 
-func (h *UserHandler) Register(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) Register(ctx *fiber.Ctx) error {
+	user := dto.UserRegisterDto{}
+	err := ctx.BodyParser(&user)
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "invalid inputs",
+		})
+	}
+
+	token, err := hndlr.svc.Register(user)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "error signing up",
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "register",
+		"message": token,
 	})
 }
 
-func (h *UserHandler) Login(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "login",
 	})
 }
 
-func (h *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "get-verification-code",
 	})
 }
 
-func (h *UserHandler) Verify(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) Verify(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "verify",
 	})
 }
 
-func (h *UserHandler) GetProfile(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) GetProfile(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "get-profile",
 	})
 }
-func (h *UserHandler) CreateProfile(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) CreateProfile(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "create-profile",
 	})
 }
 
-func (h *UserHandler) GetCart(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) GetCart(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "get-cart",
 	})
 }
 
-func (h *UserHandler) AddToCart(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) AddToCart(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "add-to-cart",
 	})
 }
 
-func (h *UserHandler) GetOrders(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) GetOrders(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "get-orders",
 	})
 }
 
-func (h *UserHandler) GetOrder(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) GetOrder(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "get-order-by-id",
 	})
 }
 
-func (h *UserHandler) BecomeASeller(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) AddRole(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "become-a-seller",
+		"message": "add-role",
 	})
 }
