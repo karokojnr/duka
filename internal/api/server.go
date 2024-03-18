@@ -5,23 +5,42 @@ import (
 	"github.com/karokojnr/duka/config"
 	"github.com/karokojnr/duka/internal/api/rest"
 	"github.com/karokojnr/duka/internal/api/rest/handlers"
+	"github.com/karokojnr/duka/internal/domain"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
 	"log"
 )
 
 func StartServer(config config.AppConfig) {
 	app := fiber.New()
-	handler := &rest.RestHandler{
+
+	db, err := gorm.Open(postgres.Open(config.Dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Unable to connect to DB: %v\n", err)
+	}
+
+	log.Println("connected to db🎉")
+
+	// run db migration
+	err = db.AutoMigrate(&domain.User{})
+	if err != nil {
+		log.Printf("db migration failed %v\n", err)
+	}
+
+	handler := &rest.Handler{
 		App: app,
+		DB:  db,
 	}
 	setUpHandlers(handler)
 
-	err := app.Listen(config.Port)
+	err = app.Listen(config.Port)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func setUpHandlers(handler *rest.RestHandler) {
+func setUpHandlers(handler *rest.Handler) {
 	// User handler
 	handlers.SetupUserRoutes(handler)
 

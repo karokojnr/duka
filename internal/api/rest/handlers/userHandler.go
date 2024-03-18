@@ -12,7 +12,7 @@ type UserHandler struct {
 	svc service.UserService
 }
 
-func SetupUserRoutes(restHandler *rest.RestHandler) {
+func SetupUserRoutes(restHandler *rest.Handler) {
 	app := restHandler.App
 
 	svc := service.UserService{}
