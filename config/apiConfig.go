@@ -7,8 +7,9 @@ import (
 )
 
 type AppConfig struct {
-	Port string
-	Dsn  string
+	Port      string
+	Dsn       string
+	AppSecret string
 }
 
 func SetUpEnvironment() (cfg AppConfig, err error) {
@@ -29,5 +30,10 @@ func SetUpEnvironment() (cfg AppConfig, err error) {
 		return AppConfig{}, errors.New("dsn not found in environment variables")
 	}
 
-	return AppConfig{Port: httpPort, Dsn: dsn}, nil
+	appSecret := os.Getenv("APP_SECRET")
+	if len(dsn) < 1 {
+		return AppConfig{}, errors.New("app secret not found in environment variables")
+	}
+
+	return AppConfig{Port: httpPort, Dsn: dsn, AppSecret: appSecret}, nil
 }

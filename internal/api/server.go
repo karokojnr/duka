@@ -6,6 +6,7 @@ import (
 	"github.com/karokojnr/duka/internal/api/rest"
 	"github.com/karokojnr/duka/internal/api/rest/handlers"
 	"github.com/karokojnr/duka/internal/domain"
+	"github.com/karokojnr/duka/internal/helper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -28,9 +29,12 @@ func StartServer(config config.AppConfig) {
 		log.Printf("db migration failed %v\n", err)
 	}
 
+	auth := helper.SetupAuth(config.AppSecret)
+
 	handler := &rest.Handler{
-		App: app,
-		DB:  db,
+		App:  app,
+		DB:   db,
+		Auth: auth,
 	}
 	setUpHandlers(handler)
 

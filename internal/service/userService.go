@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"github.com/karokojnr/duka/internal/domain"
 	"github.com/karokojnr/duka/internal/dto"
+	"github.com/karokojnr/duka/internal/helper"
 	"github.com/karokojnr/duka/internal/repository"
 )
 
 type UserService struct {
 	UsrRepo repository.UserRepository
+	Auth    helper.Auth
 }
 
 func (svc UserService) Register(input dto.UserRegisterDto) (string, error) {
@@ -25,11 +27,17 @@ func (svc UserService) Register(input dto.UserRegisterDto) (string, error) {
 
 func (svc UserService) Login(input dto.UserLoginDto) (string, error) {
 	usr, err := svc.UsrRepo.GetUser(input.Email)
-	// todo:compare password and generate token
+
 	if err != nil {
 		return "", errors.New("no user found with the email provided")
 	}
-	return usr.Email, err
+
+	err = svc.Auth.VerifyPassword(input.Password, usr.Password)
+	if err != nil {
+		return "", err
+	}
+
+	return svc.Auth.GenerateToken(usr.ID, usr.Email, usr.UserRole)
 }
 
 func (svc UserService) findUserByEmail(email string) (*domain.User, error) {

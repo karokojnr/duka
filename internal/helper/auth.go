@@ -15,6 +15,12 @@ type Auth struct {
 	Secret string
 }
 
+func SetupAuth(s string) Auth {
+	return Auth{
+		Secret: s,
+	}
+}
+
 func (a Auth) CreateHashedPassword(password string) (string, error) {
 	if len(password) < 6 {
 		return "", errors.New(`password should contain at least 6 characters`)
