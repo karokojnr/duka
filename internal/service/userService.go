@@ -1,29 +1,40 @@
 package service
 
 import (
+	"errors"
+	"fmt"
 	"github.com/karokojnr/duka/internal/domain"
 	"github.com/karokojnr/duka/internal/dto"
-	"log"
+	"github.com/karokojnr/duka/internal/repository"
 )
 
 type UserService struct {
-	// todo
+	UsrRepo repository.UserRepository
 }
 
 func (svc UserService) Register(input dto.UserRegisterDto) (string, error) {
-	log.Println(input)
-	// todo: handle user registration
-	return "user-token", nil
+	usr, err := svc.UsrRepo.CreateUser(domain.User{
+		Email:    input.Email,
+		Password: input.Password,
+		Phone:    input.Phone,
+	})
+	// todo: generate token
+	userInfo := fmt.Sprintf("%v, %v, %v", usr.ID, usr.Email, usr.UserRole)
+	return userInfo, err
 }
 
-func (svc UserService) Login(input any) (string, error) {
-	return "", nil
+func (svc UserService) Login(input dto.UserLoginDto) (string, error) {
+	usr, err := svc.UsrRepo.GetUser(input.Email)
+	// todo:compare password and generate token
+	if err != nil {
+		return "", errors.New("no user found with the email provided")
+	}
+	return usr.Email, err
 }
 
 func (svc UserService) findUserByEmail(email string) (*domain.User, error) {
-	// todo: perform some db operation
-	// todo: business logic
-	return nil, nil
+	usr, err := svc.UsrRepo.GetUser(email)
+	return &usr, err
 }
 
 func (svc UserService) GetVerificationCode(usr domain.User) (int, error) {

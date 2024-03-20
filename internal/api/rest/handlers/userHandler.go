@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/karokojnr/duka/internal/api/rest"
 	"github.com/karokojnr/duka/internal/dto"
+	"github.com/karokojnr/duka/internal/repository"
 	"github.com/karokojnr/duka/internal/service"
 	"net/http"
 )
@@ -15,7 +16,9 @@ type UserHandler struct {
 func SetupUserRoutes(restHandler *rest.Handler) {
 	app := restHandler.App
 
-	svc := service.UserService{}
+	svc := service.UserService{
+		UsrRepo: repository.NewUserRepository(restHandler.DB),
+	}
 	handler := UserHandler{
 		svc,
 	}
@@ -63,8 +66,22 @@ func (hndlr *UserHandler) Register(ctx *fiber.Ctx) error {
 }
 
 func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
+	loginInput := dto.UserLoginDto{}
+	err := ctx.BodyParser(&loginInput)
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "invalid inputs",
+		})
+	}
+
+	token, err := hndlr.svc.Login(loginInput)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "wrong email or password",
+		})
+	}
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "login",
+		"message": token,
 	})
 }
 
