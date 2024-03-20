@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/karokojnr/duka/internal/domain"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"time"
 )
 
@@ -66,14 +67,14 @@ func (a Auth) VerifyPassword(plainPassword, hashedPassword string) error {
 }
 
 func (a Auth) VerifyToken(t []string) (domain.User, error) {
-	//tokenArr := strings.Split(t, " ")
-	if len(t) != 2 {
+	tkn := t[0]
+	tokenArr := strings.Split(tkn, " ")
+	if len(tokenArr) != 2 {
 		return domain.User{}, nil
 	}
 
-	tokenStr := t[1]
-
-	if t[0] != "Bearer" {
+	tokenStr := tokenArr[1]
+	if tokenArr[0] != "Bearer" {
 		return domain.User{}, errors.New(`invalid token`)
 	}
 
@@ -110,7 +111,7 @@ func (a Auth) Authorize(ctx *fiber.Ctx) error {
 		return ctx.Next()
 	} else {
 		return ctx.Status(401).JSON(&fiber.Map{
-			"message": "authorization failed",
+			"message": "unauthorized",
 			"data":    err,
 		})
 	}

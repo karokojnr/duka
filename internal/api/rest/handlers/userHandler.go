@@ -24,24 +24,28 @@ func SetupUserRoutes(restHandler *rest.Handler) {
 		svc,
 	}
 
+	publicRouteGrp := app.Group("/users")
+
 	// public endpoints
-	app.Post("/register", handler.Register)
-	app.Post("/login", handler.Login)
+	publicRouteGrp.Post("/register", handler.Register)
+	publicRouteGrp.Post("/login", handler.Login)
+
+	privateRoutesGrp := publicRouteGrp.Group("/", restHandler.Auth.Authorize)
 
 	// private endpoints
-	app.Get("/verify", handler.GetVerificationCode)
-	app.Post("/verify", handler.Verify)
+	privateRoutesGrp.Get("/verify", handler.GetVerificationCode)
+	privateRoutesGrp.Post("/verify", handler.Verify)
 
-	app.Get("/profile", handler.GetProfile)
-	app.Post("/profile", handler.CreateProfile)
+	privateRoutesGrp.Get("/profile", handler.GetProfile)
+	privateRoutesGrp.Post("/profile", handler.CreateProfile)
 
-	app.Get("/cart", handler.GetCart)
-	app.Post("/cart", handler.AddToCart)
+	privateRoutesGrp.Get("/cart", handler.GetCart)
+	privateRoutesGrp.Post("/cart", handler.AddToCart)
 
-	app.Get("/order", handler.GetOrders)
-	app.Get("/order/:id", handler.GetOrder)
+	privateRoutesGrp.Get("/order", handler.GetOrders)
+	privateRoutesGrp.Get("/order/:id", handler.GetOrder)
 
-	app.Post("/role", handler.AddRole)
+	privateRoutesGrp.Post("/role", handler.AddRole)
 
 }
 
@@ -62,7 +66,8 @@ func (hndlr *UserHandler) Register(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": token,
+		"message": "Login successful",
+		"data":    token,
 	})
 }
 
@@ -82,7 +87,8 @@ func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
 		})
 	}
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": token,
+		"message": "Login successful",
+		"data":    token,
 	})
 }
 
