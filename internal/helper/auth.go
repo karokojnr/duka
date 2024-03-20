@@ -7,7 +7,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/karokojnr/duka/internal/domain"
 	"golang.org/x/crypto/bcrypt"
-	"strings"
 	"time"
 )
 
@@ -66,15 +65,15 @@ func (a Auth) VerifyPassword(plainPassword, hashedPassword string) error {
 	return nil
 }
 
-func (a Auth) VerifyToken(t string) (domain.User, error) {
-	tokenArr := strings.Split(t, " ")
-	if len(tokenArr) != 2 {
+func (a Auth) VerifyToken(t []string) (domain.User, error) {
+	//tokenArr := strings.Split(t, " ")
+	if len(t) != 2 {
 		return domain.User{}, nil
 	}
 
-	tokenStr := tokenArr[1]
+	tokenStr := t[1]
 
-	if tokenStr != "Bearer" {
+	if t[0] != "Bearer" {
 		return domain.User{}, errors.New(`invalid token`)
 	}
 
