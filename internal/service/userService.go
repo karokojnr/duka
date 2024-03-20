@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"github.com/karokojnr/duka/internal/domain"
 	"github.com/karokojnr/duka/internal/dto"
 	"github.com/karokojnr/duka/internal/helper"
@@ -15,14 +14,18 @@ type UserService struct {
 }
 
 func (svc UserService) Register(input dto.UserRegisterDto) (string, error) {
+
+	hashedPassword, err := svc.Auth.CreateHashedPassword(input.Password)
+	if err != nil {
+		return "", err
+	}
+
 	usr, err := svc.UsrRepo.CreateUser(domain.User{
 		Email:    input.Email,
-		Password: input.Password,
+		Password: hashedPassword,
 		Phone:    input.Phone,
 	})
-	// todo: generate token
-	userInfo := fmt.Sprintf("%v, %v, %v", usr.ID, usr.Email, usr.UserRole)
-	return userInfo, err
+	return svc.Auth.GenerateToken(usr.ID, usr.Email, usr.UserRole)
 }
 
 func (svc UserService) Login(input dto.UserLoginDto) (string, error) {
