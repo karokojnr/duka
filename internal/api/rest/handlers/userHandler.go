@@ -105,8 +105,10 @@ func (hndlr *UserHandler) Verify(ctx *fiber.Ctx) error {
 }
 
 func (hndlr *UserHandler) GetProfile(ctx *fiber.Ctx) error {
+	user := hndlr.svc.Auth.GetCurrentUser(ctx)
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "get-profile",
+		"data":    user,
 	})
 }
 func (hndlr *UserHandler) CreateProfile(ctx *fiber.Ctx) error {
