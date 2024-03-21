@@ -68,7 +68,7 @@ func (hndlr *UserHandler) Register(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Login successful",
+		"message": "Registration successful",
 		"data":    token,
 	})
 }
@@ -99,8 +99,17 @@ func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
 func (hndlr *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
 	user := hndlr.svc.Auth.GetCurrentUser(ctx)
 
+	code, err := hndlr.svc.GetVerificationCode(user)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "unable to get verification code",
+			"data":    err,
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "get-verification-code",
+		"message": "Verification code sent successfully",
+		"data":    code,
 	})
 }
 
