@@ -128,8 +128,8 @@ func (hndlr *UserHandler) Verify(ctx *fiber.Ctx) error {
 	err := hndlr.svc.VerifyCode(user.ID, req.Code)
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"message": "err",
-			"data":    err,
+			"message": "error",
+			"data":    err.Error(),
 		})
 	}
 
