@@ -55,6 +55,7 @@ func (hndlr *UserHandler) Register(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
 			"message": "invalid inputs",
+			"data":    err,
 		})
 	}
 
@@ -62,6 +63,7 @@ func (hndlr *UserHandler) Register(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "error signing up",
+			"data":    err,
 		})
 	}
 
@@ -77,6 +79,7 @@ func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
 			"message": "invalid inputs",
+			"data":    err,
 		})
 	}
 
@@ -84,6 +87,7 @@ func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "wrong email or password",
+			"data":    err,
 		})
 	}
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
@@ -93,6 +97,8 @@ func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
 }
 
 func (hndlr *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
+	user := hndlr.svc.Auth.GetCurrentUser(ctx)
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "get-verification-code",
 	})

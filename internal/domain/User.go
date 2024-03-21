@@ -9,7 +9,7 @@ type User struct {
 	Email      string    `json:"email" gorm:"index;unique;not null"`
 	Phone      string    `json:"phone"`
 	Password   string    `json:"password"`
-	Code       string    `json:"code"`
+	Code       int       `json:"code"`
 	ExpiryTime time.Time `json:"expiry_time"`
 	IsVerified bool      `json:"is_verified" gorm:"default:false"`
 	UserRole   string    `json:"user_role"  gorm:"default:buyer"`

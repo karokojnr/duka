@@ -6,6 +6,7 @@ import (
 	"github.com/karokojnr/duka/internal/dto"
 	"github.com/karokojnr/duka/internal/helper"
 	"github.com/karokojnr/duka/internal/repository"
+	"time"
 )
 
 type UserService struct {
@@ -48,8 +49,35 @@ func (svc UserService) findUserByEmail(email string) (*domain.User, error) {
 	return &usr, err
 }
 
+func (svc UserService) isVerified(id uint) bool {
+	currentUser, err := svc.UsrRepo.GetUserById(id)
+	return err == nil && currentUser.IsVerified
+}
+
 func (svc UserService) GetVerificationCode(usr domain.User) (int, error) {
-	return 0, nil
+
+	if svc.isVerified(usr.ID) {
+		return 0, nil
+	}
+
+	code, err := svc.Auth.GenerateCode()
+	if err != nil {
+		return 0, err
+	}
+
+	user := domain.User{
+		ExpiryTime: time.Now().Add(30 * time.Minute),
+		Code:       code,
+	}
+
+	_, err = svc.UsrRepo.UpdateUser(usr.ID, user)
+	if err != nil {
+		return 0, errors.New("unable to update verification code")
+	}
+
+	// todo: send sms
+
+	return code, nil
 }
 
 func (svc UserService) VerifyCode(userId uint, code int) error {
