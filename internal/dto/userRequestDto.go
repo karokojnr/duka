@@ -9,3 +9,7 @@ type UserRegisterDto struct {
 	UserLoginDto
 	Phone string `json:"phone"`
 }
+
+type UserVerificationDto struct {
+	Code int `json:"code"`
+}

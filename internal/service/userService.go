@@ -54,10 +54,10 @@ func (svc UserService) isVerified(id uint) bool {
 	return err == nil && currentUser.IsVerified
 }
 
-func (svc UserService) GetVerificationCode(usr domain.User) (int, error) {
+func (svc UserService) SendVerificationCode(usr domain.User) (int, error) {
 
 	if svc.isVerified(usr.ID) {
-		return 0, nil
+		return 0, errors.New("user already verified")
 	}
 
 	code, err := svc.Auth.GenerateCode()
@@ -81,6 +81,32 @@ func (svc UserService) GetVerificationCode(usr domain.User) (int, error) {
 }
 
 func (svc UserService) VerifyCode(userId uint, code int) error {
+	if svc.isVerified(userId) {
+		return errors.New("user already verified")
+	}
+
+	user, err := svc.UsrRepo.GetUserById(userId)
+	if err != nil {
+		return err
+	}
+
+	if user.Code != code {
+		return errors.New("verification code does not match")
+	}
+
+	if !time.Now().Before(user.ExpiryTime) {
+		return errors.New("verification code expired")
+	}
+
+	updatedUser := domain.User{
+		IsVerified: true,
+	}
+
+	_, err = svc.UsrRepo.UpdateUser(userId, updatedUser)
+	if err != nil {
+		return errors.New("unable to verify user")
+	}
+
 	return nil
 }
 

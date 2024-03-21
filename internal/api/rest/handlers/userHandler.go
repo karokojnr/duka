@@ -33,7 +33,7 @@ func SetupUserRoutes(restHandler *rest.Handler) {
 	privateRoutesGrp := publicRouteGrp.Group("/", restHandler.Auth.Authorize)
 
 	// private endpoints
-	privateRoutesGrp.Get("/verify", handler.GetVerificationCode)
+	privateRoutesGrp.Get("/verify", handler.SendVerificationCode)
 	privateRoutesGrp.Post("/verify", handler.Verify)
 
 	privateRoutesGrp.Get("/profile", handler.GetProfile)
@@ -96,10 +96,10 @@ func (hndlr *UserHandler) Login(ctx *fiber.Ctx) error {
 	})
 }
 
-func (hndlr *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
+func (hndlr *UserHandler) SendVerificationCode(ctx *fiber.Ctx) error {
 	user := hndlr.svc.Auth.GetCurrentUser(ctx)
 
-	code, err := hndlr.svc.GetVerificationCode(user)
+	code, err := hndlr.svc.SendVerificationCode(user)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "unable to get verification code",
@@ -114,8 +114,27 @@ func (hndlr *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
 }
 
 func (hndlr *UserHandler) Verify(ctx *fiber.Ctx) error {
+	user := hndlr.svc.Auth.GetCurrentUser(ctx)
+
+	var req dto.UserVerificationDto
+
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "invalid input",
+			"data":    "please provide a valid input",
+		})
+	}
+
+	err := hndlr.svc.VerifyCode(user.ID, req.Code)
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "err",
+			"data":    err,
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "verify",
+		"message": "verification successful",
 	})
 }
 
