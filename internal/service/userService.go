@@ -2,16 +2,20 @@ package service
 
 import (
 	"errors"
+	"github.com/karokojnr/duka/config"
 	"github.com/karokojnr/duka/internal/domain"
 	"github.com/karokojnr/duka/internal/dto"
 	"github.com/karokojnr/duka/internal/helper"
 	"github.com/karokojnr/duka/internal/repository"
+	"github.com/karokojnr/duka/pkg/notification"
+	"strconv"
 	"time"
 )
 
 type UserService struct {
 	UsrRepo repository.UserRepository
 	Auth    helper.Auth
+	Config  config.AppConfig
 }
 
 func (svc UserService) Register(input dto.UserRegisterDto) (string, error) {
@@ -54,15 +58,15 @@ func (svc UserService) isVerified(id uint) bool {
 	return err == nil && currentUser.IsVerified
 }
 
-func (svc UserService) SendVerificationCode(usr domain.User) (int, error) {
+func (svc UserService) SendVerificationCode(usr domain.User) error {
 
 	if svc.isVerified(usr.ID) {
-		return 0, errors.New("user already verified")
+		return errors.New("user already verified")
 	}
 
 	code, err := svc.Auth.GenerateCode()
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	user := domain.User{
@@ -72,12 +76,19 @@ func (svc UserService) SendVerificationCode(usr domain.User) (int, error) {
 
 	_, err = svc.UsrRepo.UpdateUser(usr.ID, user)
 	if err != nil {
-		return 0, errors.New("unable to update verification code")
+		return errors.New("unable to update verification code")
 	}
 
-	// todo: send sms
+	user, _ = svc.UsrRepo.GetUserById(user.ID)
 
-	return code, nil
+	// send sms
+	notificationClient := notification.NewNotificationClient(svc.Config)
+	err = notificationClient.SendSms(user.Phone, strconv.Itoa(code))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (svc UserService) VerifyCode(userId uint, code int) error {
