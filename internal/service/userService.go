@@ -9,7 +9,6 @@ import (
 	"github.com/karokojnr/duka/internal/helper"
 	"github.com/karokojnr/duka/internal/repository"
 	"github.com/karokojnr/duka/pkg/notification"
-	"log"
 	"time"
 )
 
@@ -81,7 +80,6 @@ func (svc UserService) SendVerificationCode(usr domain.User) error {
 	}
 
 	user, _ = svc.UsrRepo.GetUserById(usr.ID)
-	log.Println(user.Phone)
 	// send sms
 	notificationClient := notification.NewNotificationClient(svc.Config)
 

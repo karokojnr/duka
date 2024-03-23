@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/karokojnr/duka/internal/api/rest"
 	"github.com/karokojnr/duka/internal/dto"
@@ -102,7 +101,6 @@ func (hndlr *UserHandler) SendVerificationCode(ctx *fiber.Ctx) error {
 	user := hndlr.svc.Auth.GetCurrentUser(ctx)
 
 	err := hndlr.svc.SendVerificationCode(user)
-	fmt.Println(err.Error())
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "unable to get verification code",
