@@ -50,6 +50,5 @@ func setUpHandlers(handler *rest.Handler) {
 	handlers.SetupUserRoutes(handler)
 
 	// todo: Transactions handler
-
 	// todo: Catalog handler
 }
