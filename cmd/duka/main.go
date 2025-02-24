@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/karokojnr/duka/config"
 	"github.com/karokojnr/duka/internal/api"
 	"log"
@@ -9,7 +10,7 @@ import (
 func run() error {
 	cfg, err := config.SetUpEnvironment()
 	if err != nil {
-		log.Fatalf("configurations not loaded %v\n", err)
+		return fmt.Errorf("config.SetupEnvironment: %w", err)
 	}
 	api.StartServer(cfg)
 	return nil

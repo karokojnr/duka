@@ -23,7 +23,6 @@ func StartServer(config config.AppConfig) {
 
 	log.Println("connected to db🎉")
 
-	// run db migration
 	err = db.AutoMigrate(&domain.User{})
 	if err != nil {
 		log.Printf("db migration failed %v\n", err)
